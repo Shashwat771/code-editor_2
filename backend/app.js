@@ -7,7 +7,6 @@ var cors = require("cors");
 require('dotenv').config();
 const connectDB = require('./db');
 
-// Connect to Database
 connectDB();
 
 var indexRouter = require('./routes/index');
@@ -15,7 +14,14 @@ var usersRouter = require('./routes/users');
 
 var app = express();
 
-// view engine setup
+// ✅ CORS first — before everything else
+app.use(cors({
+  origin:  "https://frontend-8lzf.onrender.com",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
@@ -25,29 +31,17 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(cors({
-  origin: "https://techiolaza-backend.onrender.com/",
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
-
+// ✅ Routes mounted once only
 app.use('/api', indexRouter);
-app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-// catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
 });
 
-// error handler
 app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
   res.status(err.status || 500);
   res.render('error');
 });
